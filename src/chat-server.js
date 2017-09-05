@@ -8,9 +8,10 @@ var app = require('http').createServer(handler)
 var io = require('socket.io')(app)
 var fs = require('fs')
 
-app.listen(3002)
+app.listen(process.env.PORT || 3002)
 
 function handler (req, res) {
+
   fs.readFile(path.join(__dirname, '/index.html'),
     function (err, data) {
       if (err) {
