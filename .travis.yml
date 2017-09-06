@@ -8,8 +8,8 @@ services:
   - docker
 
 before_script:
-  - npm install -g standard
-script: standard
+  - npm install standard babel-eslint
+script: npm run standard-fix
 
 before_install:
   - docker build -t nathejk/chat-server .

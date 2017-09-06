@@ -11,7 +11,6 @@ var fs = require('fs')
 app.listen(process.env.PORT || 3002)
 
 function handler (req, res) {
-
   fs.readFile(path.join(__dirname, '/index.html'),
     function (err, data) {
       if (err) {
