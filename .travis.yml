@@ -1,0 +1,21 @@
+sudo: required
+
+language: node
+node_js:
+  - "node"
+
+services:
+  - docker
+
+before_script:
+  - npm install -g standard
+script: standard
+
+before_install:
+  - docker build -t nathejk/chat-server .
+
+after_success:
+  - if [ "$TRAVIS_BRANCH" == "master" ]; then
+    docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+    docker push nathejk/chat-server;
+    fi
