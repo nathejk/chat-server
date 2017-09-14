@@ -8,6 +8,8 @@ var app = require('http').createServer(handler)
 var io = require('socket.io')(app)
 var fs = require('fs')
 
+io.set('origins', '*:*')
+
 app.listen(process.env.PORT || 3002)
 
 function handler (req, res) {

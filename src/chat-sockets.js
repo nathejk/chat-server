@@ -1,21 +1,26 @@
 import uuid from 'uuid/v4'
-import moment from 'moment'
 import casual from 'casual'
 
+import db from './db'
+
+export const MSG_API__CHANGE_CHANNEL = 'MSG_API__CHANGE_CHANNEL'
 export const MSG_API__JOIN_CHANNEL = 'join channel'
 export const MSG_API__LEAVE_CHANNEL = 'leave channel'
 export const MSG_API__NEW_MESSAGE = 'new message'
+export const MSG_API__NEW_MESSAGE_BULK = 'MSG_API__NEW_MESSAGE_BULK'
+export const MSG_API__GET_MESSAGES_FROM = 'MSG_API__GET_MESSAGES_FROM'
 
 const serverUser = {
   id: 99999,
   name: 'Server'
 }
 
-const wrapMessage = (msg, user) => ({
+const wrapMessage = (msg, user, channel) => ({
   user: user || serverUser,
   message: msg || casual.words(Math.random() * 100),
   id: uuid(),
-  createdAt: moment()
+  channel: channel || 'nathejk',
+  createdAt: new Date()
 })
 
 exports = module.exports = (io) => {
@@ -45,15 +50,32 @@ exports = module.exports = (io) => {
       socket.join(channel.name)
     })
 
+    socket.on(MSG_API__CHANGE_CHANNEL, (channel) => {
+      socket.join(channel)
+    })
+
     socket.on('new message', ({channel, message, user}) => {
-      console.log({channel, message, user})
-      // socket.broadcast.to(msg.channelID).emit('new message', msg)
-      // socket.broadcast.to(msg.channelID).emit('new message', msg)
-      io.in('Nathejk').emit(MSG_API__NEW_MESSAGE, wrapMessage(message, user))
+      const wrappedMessage = wrapMessage(message, user, channel)
+      db.saveMessage(wrappedMessage)
+      io.in('Nathejk').emit(MSG_API__NEW_MESSAGE, wrappedMessage)
     })
 
     socket.on('new channel', (channel) => {
       socket.broadcast.emit('new channel', channel)
+    })
+
+    socket.on(MSG_API__GET_MESSAGES_FROM, ({channel, fromDate}) => {
+      db.getMessagesSince(channel, fromDate, (err, data) => {
+        if (err) {
+          console.error(err)
+          return
+        }
+        if (!data || data.length === 0) {
+          return
+        }
+
+        socket.emit(MSG_API__NEW_MESSAGE_BULK, data)
+      })
     })
 
     socket.on('typing', (data) => {

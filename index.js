@@ -1,6 +1,7 @@
 #!/usr/bin/env babel-node
 
 // @flow
+
 require('opbeat').start({
   appId: '230f25efa8',
   organizationId: '5e39308c355149cb9fc5280d31ede681',
